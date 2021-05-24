@@ -1,0 +1,324 @@
+create table Locatie(
+    id_locatie number(3) not null primary key,
+    judet varchar2(10) not null,
+    oras varchar2(10) not null,
+    strada varchar2(20) not null,
+    numar number(3)
+);
+create table Utilizator(
+    id_utilizator number(4) not null primary key,
+    nume  varchar2(20) not null,
+    prenume varchar2(20) not null,
+    email varchar2(30) not null,
+    telefon number(10),
+    id_locatie number(3),
+    constraint fk_utilizator_locatie foreign key(id_locatie)
+    references Locatie(id_locatie)
+);
+create table Depozit(
+    id_depozit number(4) not null primary key,
+    email varchar2(30) not null,
+    telefon number(10) not null, 
+    id_locatie number(3),
+    constraint fk_depozit_locatie foreign key(id_locatie)
+    references Locatie(id_locatie)
+);
+
+create table Categorie(
+    id_categorie number(5) not null primary key,
+    denumire_categorie varchar2(20) not null
+);
+
+create table Produs(
+    id_produs number(5) not null primary key,
+    denumire_produs varchar2(20) not null,
+    descriere varchar(50), 
+    pret number(5) not null,
+    rating number(1),
+    id_categorie number(5),
+    constraint fk_produs_categorie foreign key(id_categorie)
+    references Categorie(id_categorie)    
+);
+
+create table Review(
+    id_review number(3) not null primary key,
+    stele number(1) not null,
+    comentariu varchar2(100),
+    data_review date not null,
+    id_utilizator number(4),
+    id_produs number(5),
+    constraint fk_review_utilizator foreign key(id_utilizator)
+    references Utilizator(id_utilizator),
+    constraint fk_review_produs foreign key(id_produs)
+    references Produs(id_produs) 
+);
+create table Firma_de_curierat(
+    id_curier number(1) not null primary key,
+    denumire varchar2(10) not null,
+    telefon number(10) not null
+);
+
+create table Comanda(
+    id_comanda number(5) not null primary key,
+    data date,
+    status varchar2(10)
+    );
+
+create table Factura(
+    id_factura number(5) not null primary key,
+    data_facturare date,
+    id_comanda number(5),
+    constraint fk_factura_comanda foreign key(id_comanda)
+    references Comanda(id_comanda)
+    );
+    
+create table Disponibilitate(
+    id_depozit number(4),
+    id_produs number(5),
+    cantitate number(3),
+    constraint pk_disponibilitate primary key (id_depozit, id_produs),
+    constraint fk_disponibilitate_depozit foreign  key (id_depozit)
+    references Depozit(id_depozit),
+    constraint fk_disponibilitate_produs foreign  key (id_produs)
+    references Produs(id_produs)
+    );
+
+create table Continut(
+    id_comanda number(5),
+    id_produs number(5),
+    cantitate number(2),
+    constraint pk_continut primary key (id_comanda, id_produs),
+    constraint fk_continut_comanda foreign  key (id_comanda)
+    references Comanda(id_comanda),
+    constraint fk_continut_produs foreign  key (id_produs)
+    references Produs(id_produs)
+    );    
+
+create table Plasare_Comanda(
+    id_utilizator number(4),
+    id_comanda number(5),
+    id_curier number(1),
+    constraint pk_plasare_comanda primary key (id_utilizator, id_comanda, id_curier),
+    constraint fk_plasare_comanda_utilizator foreign  key (id_utilizator)
+    references Utilizator(id_utilizator),
+    constraint fk_plasare_comanda_comanda foreign  key (id_comanda)
+    references Comanda(id_comanda),
+    constraint fk_plasare_comanda_curier foreign  key (id_curier)
+    references Firma_de_curierat(id_curier)
+    );    
+
+
+insert into Locatie values(100, 'Timis', 'Timisoara', 'Amforei', 3); 
+insert into Locatie values(101, 'Buzau', 'Buzau', 'Spiru', 10); 
+insert into Locatie values(102, 'Dolj', 'Craiova', 'Rubinelor', 2); 
+insert into Locatie values(103, 'Neamt', 'Roman', 'Libertatii', 12); 
+insert into Locatie values(104, 'Buzau', 'Buzau', 'Bradului', 4); 
+insert into Locatie values(105, 'Bihor', 'Oradea', 'Republicii', 26); 
+insert into Locatie values(106, 'Calarasi', 'Calarasi', 'Parcului', 5); 
+insert into Locatie values(107, 'Timis', 'Timisoara', 'Teiului', 4); 
+insert into Locatie values(108, 'Calarasi', 'Calarasi', 'Belsugului', 24); 
+insert into Locatie values(109, 'Cluj', 'Dej', 'Vidului', 7); 
+insert into Locatie values(110, 'Timis', 'Timisoara', 'Marasesti', 5); 
+insert into Locatie values(111, 'Bihor', 'Oradea', 'Victoriei', 15); 
+insert into Locatie values(112, 'Cluj', 'Dej', 'Reginei', 10); 
+insert into Locatie values(113, 'Tulcea', 'Tulcea', 'Alunisului', 24); 
+insert into Locatie values(114, 'Gorj', 'Targu Jiu', 'Republicii', 16); 
+insert into Locatie values(115, 'Brasov', 'Brasov', 'Unirii', 60); 
+insert into Locatie values(116, 'Gorj', 'Targu Jiu', 'Fabricii', 10); 
+insert into Locatie values(117, 'Braila', 'Braila', 'Oituz', 3); 
+insert into Locatie values(118, 'Cluj', 'Turda', 'Rapsodiei', 12); 
+insert into Locatie values(119, 'Brasov', 'Brasov', 'Pinului', 6); 
+insert into Locatie values(120, 'Brasov', 'Brasov', 'Castelului', 85); 
+
+
+create sequence nrid
+minvalue 1000
+start with 1001
+increment by 1;
+
+insert into Utilizator values(1000, 'Verdes', 'Laurentiu', 'l_verdes@gmail.com', 0772453964, 119);
+insert into Utilizator values(nrid.nextval, 'Radoi', 'Elena', 'e_radoi@gmail.com', 0770245564, 118);
+insert into Utilizator values(nrid.nextval, 'Ionescu', 'Mihai', 'm_ionescu@gmail.com', 0770123456, 100); 
+insert into Utilizator values(nrid.nextval, 'Popescu', 'Ana', 'a_popescu@gmail.com', 0770123457, 101); 
+insert into Utilizator values(nrid.nextval, 'Popescu', 'George', 'g_popescu@gmail.com', 0770123458, 101); 
+insert into Utilizator values(nrid.nextval, 'Gheorghe', 'Paul', 'p_gheorghe@gmail.com', 0770123459, 102); 
+insert into Utilizator values(nrid.nextval, 'Ionescu', 'Laura', 'l_ionescu@gmail.com', 0770123499, 103); 
+insert into Utilizator values(nrid.nextval, 'Pop', 'Mihaela', 'm_pop@gmail.com', 0770123488, 101); 
+insert into Utilizator values(nrid.nextval, 'Ionescu', 'Iuliana', 'i_ionescu@gmail.com', 0770123436, 104); 
+insert into Utilizator values(nrid.nextval, 'Toma', 'Andreea', 'a_toma@gmail.com', null, null); 
+insert into Utilizator values(nrid.nextval, 'Grigore', 'Paul', 'p_grigore@gmail.com', 0770128656, 107); 
+insert into Utilizator values(nrid.nextval, 'Popescu', 'Cristina', 'c_popescu@gmail.com', 0770163456, 108); 
+insert into Utilizator values(nrid.nextval, 'Popescu', 'Iulia', 'i_popescu@gmail.com', null, null); 
+insert into Utilizator values(nrid.nextval, 'Oprea', 'Emil', 'e_oprea@gmail.com', 0770120456, 108); 
+insert into Utilizator values(nrid.nextval, 'Vasile', 'Florin', 'f_vasile@gmail.com', null, null); 
+insert into Utilizator values(nrid.nextval, 'Florescu', 'Bogdan', 'b_florescu@gmail.com', 0770123796, 114); 
+insert into Utilizator values(nrid.nextval, 'Dumitru', 'Valentin', 'v_dumitru@gmail.com', 0770173456, 112);
+
+
+insert into Firma_de_curierat values(1, 'GLS', 0770234324);
+insert into Firma_de_curierat values(2, 'Sameday', 0770536324);
+insert into Firma_de_curierat values(3, 'FAN', 0770234734);
+insert into Firma_de_curierat values(4, 'Cargus', 0770234308);
+insert into Firma_de_curierat values(5, 'DHL', 0775293963);
+
+
+insert into Depozit values(2000, 'a_depozit@gmail.com', 0773624843, 120);
+insert into Depozit values(2001, 'b_depozit@gmail.com', 0773255243, 119);
+insert into Depozit values(2002, 'c_depozit@gmail.com', 0773266363, 111);
+insert into Depozit values(2003, 'd_depozit@gmail.com', 0773858843, 109);
+insert into Depozit values(2004, 'e_depozit@gmail.com', 0772295877, 106);
+insert into Depozit values(2005, 'f_depozit@gmail.com', 0773859903, 117);
+insert into Depozit values(2006, 'g_depozit@gmail.com', 0776205877, 116);
+insert into Depozit values(2007, 'h_depozit@gmail.com', 0774959947, 113);
+insert into Depozit values(2008, 'i_depozit@gmail.com', 0778992257, 110);
+insert into Depozit values(2009, 'j_depozit@gmail.com', 0778305873, 109);
+insert into Depozit values(2010, 'k_depozit@gmail.com', 0773225897, 105);
+
+
+insert into Categorie values(10000, 'Fashion');
+insert into Categorie values(10001, 'Periferice');
+insert into Categorie values(10002, 'Jucarii');
+insert into Categorie values(10003, 'Laptop');
+insert into Categorie values(10004, 'Telefoane');
+
+
+insert into Produs values(20000, 'Rochie midi evazata', 'Rochie midi, neagra din poliester.', 160, 4, 10000);
+insert into Produs values(20001, 'Cardigan tricotat', 'Cardigan alb, cu maneca lunga, din poliester.', 50, null, 10000);
+insert into Produs values(20002, 'Hanorac regular fit ', 'Hanorac gri cu maneca lunga din bumbac.', 70, null, 10000);
+insert into Produs values(20003, 'Jacheta din denim', 'Jacheta gri cu maneca lunga inchis din denim.', 170, null, 10000);
+insert into Produs values(20004, 'Fusta asimetrica', 'Fusta roz, midi, asimetrica din poliester.', 160, null, 10000);
+insert into Produs values(20005, 'Mouse Logitech G502', '16k DPI, negru.', 300, 5, 10001);
+insert into Produs values(20006, 'Mouse ASUS TUF M3', '7000 DPI, iluminare Aura Sync, negru.', 100, null, 10001);
+insert into Produs values(20007, 'Tastatura HyperX', 'Iluminare RGB, rezistenta la lichide.' , 250, null, 10001);
+insert into Produs values(20008, 'Masinuta', 'Masinuta de politie rosie. Varsta: peste 6 ani.', 100, null, 10002);
+insert into Produs values(20009, 'Papusa Frozen', 'Papusa Frozen Elsa. Varsta: peste 2 ani .', 80, null, 10002);
+insert into Produs values(20010, 'Lego', 'Set piese lego, 30 bucati. Varsta: peste 6 ani.' , 60, null, 10002);
+insert into Produs values(20011, 'Laptop Acer', 'Intel Celeron 2,6 Ghz, 14'', 4GB RAM, 128GB SSD.', 1800, null, 10003);
+insert into Produs values(20012, 'Laptop ASUS ROG', 'Intel Core i7-10870H 5Ghz, 15.6'', 8GB RAM, 1TB SSD', 4900, 4, 10003);
+insert into Produs values(20013, 'Laptop Apple MacBook', 'Intel Core i9 2.3Ghz, 16GB RAM, 1TB SSD' , 15000, 5, 10003);
+
+
+insert into Comanda values(30000, to_date('18/03/2018', 'dd/mm/yyyy'), 'Livrat');
+insert into Comanda values(30001, to_date('13/04/2018', 'dd/mm/yyyy'), 'Livrat');
+insert into Comanda values(30002, to_date('19/08/2018', 'dd/mm/yyyy'), 'Livrat');
+insert into Comanda values(30003, to_date('7/03/2019', 'dd/mm/yyyy'), 'Livrat');
+insert into Comanda values(30004, to_date('28/05/2019', 'dd/mm/yyyy'), 'Livrat');
+insert into Comanda values(30005, to_date('18/06/2019', 'dd/mm/yyyy'), 'Livrat');
+insert into Comanda values(30006, to_date('28/08/2019', 'dd/mm/yyyy'), 'Livrat');
+insert into Comanda values(30007, to_date('12/02/2020', 'dd/mm/yyyy'), 'Livrat');
+insert into Comanda values(30008, to_date('23/05/2020', 'dd/mm/yyyy'), 'Livrat');
+insert into Comanda values(30009, to_date('26/05/2020', 'dd/mm/yyyy'), 'Livrat');
+insert into Comanda values(30010, to_date('3/03/2021', 'dd/mm/yyyy'), 'Livrat');
+insert into Comanda values(30011, to_date('6/03/2021', 'dd/mm/yyyy'), 'Livrat');
+insert into Comanda values(30012, to_date('8/05/2021', 'dd/mm/yyyy'), 'Livrat');
+insert into Comanda values(30013, to_date('15/05/2021', 'dd/mm/yyyy'), 'Livrat');
+insert into Comanda values(30014, to_date('19/05/2021', 'dd/mm/yyyy'), 'Expediat');
+insert into Comanda values(30015, to_date('20/05/2021', 'dd/mm/yyyy'), 'Expediat');
+insert into Comanda values(30016, to_date('21/05/2021', 'dd/mm/yyyy'), 'Procesat');
+insert into Comanda values(30017, to_date('22/05/2021', 'dd/mm/yyyy'), 'Procesat');
+insert into Comanda values(30018, to_date('23/05/2021', 'dd/mm/yyyy'), 'Procesat');
+insert into Comanda values(30019, to_date('23/05/2021', 'dd/mm/yyyy'), 'Procesat');
+
+
+insert into Continut values(30000, 20000, 2);
+insert into Continut values(30000, 20001, 1);
+insert into Continut values(30001, 20004, 1);
+insert into Continut values(30002, 20005, 3);
+insert into Continut values(30002, 20002, 1);
+insert into Continut values(30002, 20000, 5);
+insert into Continut values(30003, 20001, 3);
+insert into Continut values(30004, 20007, 1);
+insert into Continut values(30005, 20005, 2);
+insert into Continut values(30005, 20013, 1);
+insert into Continut values(30006, 20004, 1);
+insert into Continut values(30006, 20009, 2);
+insert into Continut values(30006, 20012, 4);
+insert into Continut values(30006, 20002, 1);
+insert into Continut values(30007, 20000, 2);
+insert into Continut values(30008, 20000, 1);
+insert into Continut values(30009, 20010, 2);
+insert into Continut values(30010, 20011, 1);
+insert into Continut values(30011, 20012, 1);
+insert into Continut values(30011, 20001, 1);
+insert into Continut values(30012, 20002, 1);
+insert into Continut values(30013, 20003, 1);
+insert into Continut values(30014, 20004, 2);
+insert into Continut values(30014, 20008, 1);
+insert into Continut values(30015, 20005, 1);
+insert into Continut values(30016, 20009, 1);
+insert into Continut values(30016, 20010, 1);
+insert into Continut values(30017, 20012, 1);
+insert into Continut values(30018, 20011, 1);
+insert into Continut values(30019, 20006, 1);
+
+insert into Factura values(40000, to_date('18/03/2018', 'dd/mm/yyyy'), 30000);
+insert into Factura values(40001, to_date('13/04/2018', 'dd/mm/yyyy'), 30001);
+insert into Factura values(40002, to_date('19/08/2018', 'dd/mm/yyyy'), 30002);
+insert into Factura values(40003, to_date('7/03/2019', 'dd/mm/yyyy'), 30003);
+insert into Factura values(40004, to_date('28/05/2019', 'dd/mm/yyyy'), 30004);
+insert into Factura values(40005, to_date('18/06/2019', 'dd/mm/yyyy'), 30005);
+insert into Factura values(40006, to_date('28/08/2019', 'dd/mm/yyyy'), 30006);
+insert into Factura values(40007, to_date('12/02/2020', 'dd/mm/yyyy'), 30007);
+insert into Factura values(40008, to_date('23/05/2020', 'dd/mm/yyyy'), 30008);
+insert into Factura values(40009, to_date('26/05/2020', 'dd/mm/yyyy'), 30009);
+insert into Factura values(40010, to_date('3/03/2021', 'dd/mm/yyyy'), 30010);
+insert into Factura values(40011, to_date('6/03/2021', 'dd/mm/yyyy'), 30011);
+insert into Factura values(40012, to_date('8/05/2021', 'dd/mm/yyyy'), 30012);
+insert into Factura values(40013, to_date('15/05/2021', 'dd/mm/yyyy'), 30013);
+insert into Factura values(40014, to_date('19/05/2021', 'dd/mm/yyyy'), 30014);
+insert into Factura values(40015, to_date('20/05/2021', 'dd/mm/yyyy'), 30015);
+insert into Factura values(40016, to_date('21/05/2021', 'dd/mm/yyyy'), 30016);
+insert into Factura values(40017, to_date('22/05/2021', 'dd/mm/yyyy'), 30017);
+insert into Factura values(40018, to_date('23/05/2021', 'dd/mm/yyyy'), 30018);
+insert into Factura values(40019, to_date('23/05/2021', 'dd/mm/yyyy'), 30019);
+
+
+insert into Plasare_Comanda values(1000, 30000, 2);
+insert into Plasare_Comanda values(1001, 30001, 2);
+insert into Plasare_Comanda values(1002, 30002, 3);
+insert into Plasare_Comanda values(1002, 30005, 1);
+insert into Plasare_Comanda values(1003, 30003, 4);
+insert into Plasare_Comanda values(1004, 30004, 1);
+insert into Plasare_Comanda values(1005, 30006, 1); 
+insert into Plasare_Comanda values(1006, 30007, 2);
+insert into Plasare_Comanda values(1007, 30008, 4);
+insert into Plasare_Comanda values(1008, 30009, 4);
+insert into Plasare_Comanda values(1010, 30010, 3);
+insert into Plasare_Comanda values(1011, 30011, 5);
+insert into Plasare_Comanda values(1013, 30012, 5);
+insert into Plasare_Comanda values(1011, 30013, 3);
+insert into Plasare_Comanda values(1013, 30014, 1);
+insert into Plasare_Comanda values(1000, 30015, 4);
+insert into Plasare_Comanda values(1003, 30016, 5);
+insert into Plasare_Comanda values(1000, 30017, 2);
+insert into Plasare_Comanda values(1007, 30018, 3);
+insert into Plasare_Comanda values(1004, 30019, 1);
+
+insert into Disponibilitate values(2000, 20000, 103);
+insert into Disponibilitate values(2001, 20001, 54);
+insert into Disponibilitate values(2002, 20002, 207);
+insert into Disponibilitate values(2003, 20003, 300);
+insert into Disponibilitate values(2004, 20004, 120);
+insert into Disponibilitate values(2005, 20005, 103);
+insert into Disponibilitate values(2006, 20006, 107);
+insert into Disponibilitate values(2007, 20007, 102);
+insert into Disponibilitate values(2008, 20008, 160);
+insert into Disponibilitate values(2009, 20009, 30);
+insert into Disponibilitate values(2010, 20010, 30);
+insert into Disponibilitate values(2004, 20011, 130);
+insert into Disponibilitate values(2005, 20012, 110);
+insert into Disponibilitate values(2006, 20013, 150);
+insert into Disponibilitate values(2009, 20000, 162);
+insert into Disponibilitate values(2010, 20002, 110);
+insert into Disponibilitate values(2003, 20012, 80);
+insert into Disponibilitate values(2003, 20013, 67);
+insert into Disponibilitate values(2002, 20012, 98);
+insert into Disponibilitate values(2005, 20003, 24);
+insert into Disponibilitate values(2009, 20005, 19);
+insert into Disponibilitate values(2010, 20007, 3);
+
+insert into Review values(900, 4, 'Vine bine.', to_date('24/03/2018', 'dd/mm/yyyy'), 1000, 20000);
+insert into Review values(901, 4, 'Este ok.', to_date('25/08/2018', 'dd/mm/yyyy'), 1002, 20000);
+insert into Review values(902, 5, 'Merge bine, mai ales in jocuri, recomand!', to_date('25/08/2018', 'dd/mm/yyyy'), 1002, 20005);
+insert into Review values(903, 4, 'Se incalzeste putin prea tare.', to_date('5/1/2019', 'dd/mm/yyyy'), 1005, 20012);
+insert into Review values(904, 5, 'Merge impecabil.', to_date('23/06/2019', 'dd/mm/yyyy'), 1002, 20013);

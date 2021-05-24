@@ -1,0 +1,161 @@
+--11.
+--1. Să se afișeze în ordine alfabetică numele și prenumele utilizatorilor (într-o singura coloana) care au comandat un laptop Asus sau Acer, cât și modelul de laptop (numele produsului), următoarea zi de luni după data comenzii și data comenzii, adăugându-i 3 luni.
+
+
+select concat(concat(u.nume,' '), u.prenume) as "Nume si prenume" , p.denumire_produs as "Denumire", next_day(c.data, 'Monday') as "Data 1", add_months(c.data, 3) as "Data 2"
+from Utilizator u, Comanda c, Plasare_Comanda pc, Continut k, Produs p, categorie cat
+where u.id_utilizator = pc.id_utilizator
+and pc.id_comanda = c.id_comanda
+and c.id_comanda = k.id_comanda
+and k.id_produs = p.id_produs
+and (lower(p.denumire_produs) like '%acer%' 
+or lower(p.denumire_produs) like '%asus%' )
+and p.id_categorie = cat.id_categorie
+and lower(cat.denumire_categorie) like 'laptop'
+order by 1;
+
+--2. Să se afișeze adresa completă a depozitelor și denumirea produselor din acestea. Afișati județul cu majuscule. În cazul în care cantitatea unui produs dintr-un depozit este mai mică decât 50, se va afișa prima cifra a numărului, dacă este cuprinsă între 50 și 100 se va afișa ultima cifră, altfel se va afișa canitatea fără modificări. Ordonați crescător după valorile cantităților.
+
+
+select upper(l.judet) as "Judet", l.oras as "Oras", l.strada as "Strada", l.numar as "Numar", p.denumire_produs as "Denumirea produsului", case
+when dis.cantitate <= 50 then (dis.cantitate/10)
+when (dis.cantitate > 50 and dis.cantitate < 100) then mod(dis.cantitate, 10)
+else dis.cantitate
+end as "Cantitate"
+from locatie l, depozit d, disponibilitate dis, produs p, categorie c
+where l.id_locatie =  d.id_locatie
+and d.id_depozit = dis.id_depozit
+and dis.id_produs = p.id_produs
+and p.id_categorie = c.id_categorie
+order by 6;
+
+--3. Să se afișeze numele, prenumele și numărul de telefon al utilizatorilor care au făcut comenzi după prima comandă efectuată de utilizatorul cu numele Pop (inclusiv acesta, dacă a efectuat alte comenzi ulterior) prin același curier, fără duplicate. Dacă utilizatorul curent nu se numește Popescu sau Ionescu, se va afișa o linie ('-') în locul numelui.
+
+select unique decode(u.nume, 'Popescu', 'Popescu', 'Ionescu', 'Ionescu', '-') as "Nume", u.prenume as "Prenume", u.telefon as "Număr de telefon"
+from Utilizator u, Plasare_comanda p, Comanda c, Firma_de_curierat fc
+where c.data > any (select cc.data
+            from Comanda cc, Plasare_Comanda pc, Utilizator uu
+            where uu.id_utilizator = pc.id_utilizator
+            and pc.id_comanda = cc.id_comanda
+            and initcap(uu.nume) = 'Pop'
+            and p.id_curier = pc.id_curier)
+and p.id_curier = fc.id_curier
+and u.id_utilizator = p.id_utilizator
+and p.id_comanda = c.id_comanda;
+
+--4. Să se afișeze codul departamentelor și cantitatea totală. Se vor considera departamentele ale căror cantități nu sunt mai mici decât 50, iar cantitatea totală este peste medie.
+
+with
+cantitati as
+        (select d.id_depozit, min(dis.cantitate) as cantitati_total
+        from Depozit d, Disponibilitate dis, Produs p
+        where d.id_depozit  = dis.id_depozit
+        and p.id_produs = dis.id_produs
+        group by d.id_depozit
+      having min(dis.cantitate) > 50
+    ),
+avg_cantitati as (
+            select sum(cantitati_total)/count(*) as cant_avg
+            from cantitati)
+select *
+from cantitati
+where cantitati_total >
+(select cant_avg
+from avg_cantitati);
+
+
+--5. Să se afișeze denumirea produselor, rating-ul, numărul maxim de bucăți dintre toate comenzile deja livrate care includ produsul. Daca produsul nu are rating (este null), se va afișa 0.
+
+select p.denumire_produs, nvl(p.rating, 0), a.maxim
+from Produs p, (select pp.denumire_produs, max(c.cantitate) maxim
+from Produs pp, Continut c, Comanda co
+where c.id_produs = pp.id_produs
+and c.id_comanda = co.id_comanda
+and co.status = 'Livrat'
+group by pp.denumire_produs) a
+where p.denumire_produs = a.denumire_produs;
+
+
+--12
+
+--1)Sa se mareasca cu 30 de lei toate produsele care au cel putin un review de 5 stele.
+
+update Produs p
+set p.pret = p.pret + 30
+where 
+    exists(select r.stele
+    from review r
+    where  r.id_produs = p.id_produs
+    and r.stele = 5
+);
+
+--2) Sa se stearga toate facturile pentru comenzi deja livrate;
+
+delete from Factura f
+where exists (select c.id_comanda
+from Comanda c
+where c.id_comanda = f.id_comanda
+and c.status = 'Livrat'
+);
+
+--3) Să se schimbe statusul comenzilor cu status Procesat în Expediat dacă data lor de facturare este mai veche de 2 zile.
+
+update Comanda c
+set c.status = 'Expediat'
+where
+    exists
+    (select f.data_facturare
+    from Factura f, dual 
+    where c.id_comanda = f.id_comanda
+    and sysdate - f.data_facturare >= 2
+    and c.status = 'Procesat'
+    );
+
+
+--13)
+
+create sequence nrid
+minvalue 1000
+start with 1001
+increment by 1;
+
+
+--16)
+    
+--1. Să se afișeze numele, prenumele tuturor utilizatorilor, cât și produsele comandate. Se vor afișa și cei care nu au efectuat comenzi.
+
+select u.nume, u.prenume, p.denumire_produs
+from Utilizator u
+full outer join Plasare_Comanda pc on u.id_utilizator = pc.id_utilizator
+full outer join Comanda c on c.id_comanda = pc.id_comanda
+full outer join Continut co on c.id_comanda = co.id_comanda
+full outer join Produs p on p.id_produs = co.id_produs;
+
+
+--2. Să se afișeze codurile comenzilor care conțin toate produsele cu rating 5.
+
+    select id_comanda
+    from Continut
+    where id_produs in
+    (select id_produs
+    from Produs 
+    where rating = 5)
+    group by id_comanda
+    having count(id_produs)=
+    (select count(*)
+    from Produs
+    where rating = 5);
+        
+--3. Să se afișeze codurile comenzilor care conțin toate produsele cu pretul 60.   
+
+    select distinct id_comanda
+    from Continut co
+    where not exists
+    ((select id_produs
+    from Produs p
+    where pret = 60)
+    minus
+    (select p.id_produs
+    from Produs p, Continut c
+    where p.id_produs = c.id_produs
+    and co.id_comanda = c.id_comanda));
