@@ -10,16 +10,16 @@
   - [x] Normalization
   - [x] Creating and inserting coherent data
   - [x] 5 complex queries that include:
-        * join on at least 4 tables
-        * row filter
-        * correlated subqueries with at least 3 tables
-        * noncorrelated subqueries with at least 3 tables
-        * group functions, group filter, data group
-        * order
-        * 2 string functions
-        * 2 date functions
-        * NVL, DECODE, CASE
-        * WITH clause
+      * join on at least 4 tables
+      * row filter
+      * correlated subqueries with at least 3 tables
+      * noncorrelated subqueries with at least 3 tables
+      * group functions, group filter, data group
+      * order
+      * 2 string functions
+      * 2 date functions
+      * NVL, DECODE, CASE
+      * WITH clause
  - [x] 3 update or delete operations using subqueries
  - [x] creating a sequence
  - [x] division and outer-join
